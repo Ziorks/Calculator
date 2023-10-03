@@ -90,12 +90,12 @@ button {
 }
 
 .digit {
-    background-color: rgb(65, 65, 65);
+    background-color: rgb(41, 41, 41);
     color: white;
 }
 
 .digit:active {
-    background-color: rgb(122, 121, 121);
+    background-color: rgb(99, 98, 98);
 }
 
 .zero {
