@@ -1,40 +1,37 @@
-let now = new Date();
-document.querySelector("#time").innerHTML =
-  (now.getHours() % 12) + ":" + ("0" + now.getMinutes()).slice(-2);
-setInterval(() => {
+const updateTime = () => {
   let now = new Date();
   document.querySelector("#time").innerHTML =
     (now.getHours() % 12) + ":" + ("0" + now.getMinutes()).slice(-2);
-}, 5000);
+};
+updateTime();
+setInterval(updateTime, 5000);
 
 let screenValue = "0";
 let storedValue = "";
-let operator = "";
+let displayingResult = true;
+let activeOperator = null;
+
 let readout = document.querySelector("#readout");
-let zero = document.getElementById("0");
-let one = document.getElementById("1");
-let two = document.getElementById("2");
-let three = document.getElementById("3");
-let four = document.getElementById("4");
-let five = document.getElementById("5");
-let six = document.getElementById("6");
-let seven = document.getElementById("7");
-let eight = document.getElementById("8");
-let nine = document.getElementById("9");
 let dot = document.getElementById(".");
 let equals = document.getElementById("equals");
 let sign = document.getElementById("sign");
-let divide = document.getElementById("divide");
 let clear = document.getElementById("clear");
 let percent = document.getElementById("percent");
-let add = document.getElementById("add");
-let subtract = document.getElementById("subtract");
-let multiply = document.getElementById("multiply");
+let digits = [];
+for (let i = 0; i < 10; i++) {
+  digits.push(document.getElementById(`${i}`));
+}
+let operators = {
+  add: document.getElementById("add"),
+  subtract: document.getElementById("subtract"),
+  multiply: document.getElementById("multiply"),
+  divide: document.getElementById("divide"),
+};
 
 function calculate() {
   let result = 0;
 
-  switch (operator) {
+  switch (activeOperator) {
     case "add":
       result = parseFloat(storedValue) + parseFloat(screenValue);
       break;
@@ -57,86 +54,113 @@ function calculate() {
   }
 }
 
-zero.addEventListener("click", (e) => {
-  if (screenValue != "0") {
-    screenValue += "0";
+function uncolorActiveOperator() {
+  if (activeOperator != null) {
+    operators[activeOperator].style.backgroundColor = "orange";
+    operators[activeOperator].style.color = "white";
+  }
+}
+
+function pressDigit(digit) {
+  if (displayingResult) {
+    screenValue = `${digit}`;
+  } else {
+    screenValue += `${digit}`;
   }
   readout.innerHTML = screenValue;
-});
-
-one.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "1") : (screenValue += "1");
-  readout.innerHTML = screenValue;
   clear.innerHTML = "C";
-});
+  displayingResult = false;
+  uncolorActiveOperator();
+}
 
-two.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "2") : (screenValue += "2");
+function press0() {
+  if (screenValue != "0") {
+    screenValue += "0";
+    displayingResult = false;
+  }
   readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
+  uncolorActiveOperator();
+}
 
-three.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "3") : (screenValue += "3");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-four.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "4") : (screenValue += "4");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-five.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "5") : (screenValue += "5");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-six.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "6") : (screenValue += "6");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-seven.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "7") : (screenValue += "7");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-eight.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "8") : (screenValue += "8");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-nine.addEventListener("click", (e) => {
-  screenValue == "0" ? (screenValue = "9") : (screenValue += "9");
-  readout.innerHTML = screenValue;
-  clear.innerHTML = "C";
-});
-
-dot.addEventListener("click", (e) => {
+function pressDot() {
   if (screenValue == "0") {
     screenValue = "0.";
   } else if (!screenValue.includes(".")) {
     screenValue += ".";
   }
+  displayingResult = false;
   readout.innerHTML = screenValue;
   clear.innerHTML = "C";
+}
+
+function pressClear() {
+  if (clear.innerHTML == "C") {
+    clear.innerHTML = "AC";
+  } else {
+    storedValue = "";
+    uncolorActiveOperator();
+    activeOperator = null;
+  }
+  displayingResult = true;
+  screenValue = "0";
+  readout.innerHTML = screenValue;
+}
+
+function pressOperator(operator) {
+  const op = operators[operator];
+  uncolorActiveOperator();
+  op.style.backgroundColor = "white";
+  op.style.color = "orange";
+  activeOperator = operator;
+  calculate();
+  displayingResult = true;
+  screenValue = "0";
+}
+
+function pressEquals() {
+  calculate();
+  displayingResult = true;
+}
+
+digits[0].addEventListener("click", (e) => {
+  press0();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.code == "Numpad0" || e.code == "Digit0") {
+    press0();
+  }
+});
+
+for (let i = 1; i < 10; i++) {
+  digits[i].addEventListener("click", (e) => {
+    pressDigit(i);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.code == "Numpad" + `${i}` || e.code == "Digit" + `${i}`) {
+      pressDigit(i);
+    }
+  });
+}
+
+dot.addEventListener("click", (e) => {
+  pressDot();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.code == "NumpadDecimal" || e.code == "Period") {
+    pressDot();
+  }
 });
 
 clear.addEventListener("click", (e) => {
-  if (clear.innerHTML == "C") {
-    screenValue = "0";
-    clear.innerHTML = "AC";
-  } else {
-    screenValue = "0";
-    storedValue = "";
+  pressClear();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.code == "Delete") {
+    pressClear();
   }
-  readout.innerHTML = screenValue;
 });
 
 sign.addEventListener("click", (e) => {
@@ -149,30 +173,34 @@ percent.addEventListener("click", (e) => {
   readout.innerHTML = screenValue;
 });
 
-add.addEventListener("click", (e) => {
-  operator = "add";
-  calculate();
-  screenValue = "0";
-});
-
-subtract.addEventListener("click", (e) => {
-  operator = "subtract";
-  calculate();
-  screenValue = "0";
-});
-
-multiply.addEventListener("click", (e) => {
-  operator = "multiply";
-  calculate();
-  screenValue = "0";
-});
-
-divide.addEventListener("click", (e) => {
-  operator = "divide";
-  calculate();
-  screenValue = "0";
-});
+for (const operator in operators) {
+  const op = operators[operator];
+  op.addEventListener("click", (e) => {
+    pressOperator(operator);
+  });
+  op.addEventListener("mouseover", (e) => {
+    op.style.backgroundColor = "rgb(255, 212, 133)";
+  });
+  op.addEventListener("mouseleave", (e) => {
+    if (activeOperator == operator) {
+      op.style.backgroundColor = "white";
+    } else {
+      op.style.backgroundColor = "orange";
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.code.toLocaleLowerCase() == "numpad" + `${operator}`) {
+      pressOperator(operator);
+    }
+  });
+}
 
 equals.addEventListener("click", (e) => {
-  calculate();
+  pressEquals();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.code == "NumpadEnter" || e.code == "Enter") {
+    pressEquals();
+  }
 });

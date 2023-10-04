@@ -76,11 +76,15 @@ button {
     font-size: max(3vh, 20px);
 }
 
+button:hover {
+    cursor: pointer;
+}
+
 .special {
     background-color: rgb(148, 147, 147);
 }
 
-.special:active {
+.special:hover {
     background-color: rgb(204, 202, 202);
 }
 
@@ -89,12 +93,16 @@ button {
     color: white;
 }
 
+.operator:hover {
+    background-color: rgb(255, 212, 133);
+}
+
 .digit {
     background-color: rgb(41, 41, 41);
     color: white;
 }
 
-.digit:active {
+.digit:hover {
     background-color: rgb(99, 98, 98);
 }
 
