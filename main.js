@@ -12,8 +12,10 @@ for (let i = 0; i < buttons.length; i++) {
 }
 
 let screenValue = "0";
-let storedValue = "0";
-let displayingResult = true;
+let memoryValue = "";
+let operationValue = "";
+let inputting = false;
+let operationState = false;
 let activeOperator = null;
 
 let regex = /\d/g;
@@ -36,22 +38,33 @@ let operators = {
 };
 
 function calculate() {
+  const scrnum = parseFloat(screenValue);
+  const memnum = parseFloat(memoryValue);
+  const opnum = parseFloat(operationValue);
   switch (activeOperator) {
     case "add":
-      return (parseFloat(screenValue) + parseFloat(storedValue)).toString();
-    case "multiply":
-      return (parseFloat(screenValue) * parseFloat(storedValue)).toString();
-    case "subtract":
-      if (displayingResult) {
-        return (parseFloat(screenValue) - parseFloat(storedValue)).toString();
+      if (memoryValue == "") {
+        return (scrnum + opnum).toString();
       } else {
-        return (parseFloat(storedValue) - parseFloat(screenValue)).toString();
+        return (memnum + opnum).toString();
+      }
+    case "multiply":
+      if (memoryValue == "") {
+        return (scrnum * opnum).toString();
+      } else {
+        return (memnum * opnum).toString();
+      }
+    case "subtract":
+      if (memoryValue == "") {
+        return (scrnum - opnum).toString();
+      } else {
+        return (memnum - opnum).toString();
       }
     case "divide":
-      if (displayingResult) {
-        return (parseFloat(screenValue) / parseFloat(storedValue)).toString();
+      if (memoryValue == "") {
+        return (scrnum / opnum).toString();
       } else {
-        return (parseFloat(storedValue) / parseFloat(screenValue)).toString();
+        return (memnum / opnum).toString();
       }
   }
 }
@@ -65,12 +78,12 @@ function uncolorActiveOperator() {
 
 function update() {
   readout.innerHTML = screenValue;
-  displayingResult = false;
+  inputting = true;
   uncolorActiveOperator();
 }
 
 function pressDigit(digit) {
-  if (displayingResult || screenValue == "0") {
+  if (!inputting || screenValue == "0") {
     screenValue = `${digit}`;
   } else if (screenValue.match(regex).length < 9) {
     screenValue += `${digit}`;
@@ -80,8 +93,9 @@ function pressDigit(digit) {
 }
 
 function press0() {
-  if (displayingResult) {
+  if (!inputting) {
     screenValue = "0";
+    clear.innerHTML = "C";
   } else if (screenValue != "0" && screenValue.match(regex).length < 9) {
     screenValue += "0";
   }
@@ -89,7 +103,7 @@ function press0() {
 }
 
 function pressDot() {
-  if (displayingResult || screenValue == "0") {
+  if (!inputting || screenValue == "0") {
     screenValue = "0.";
   } else if (
     !screenValue.includes(".") &&
@@ -104,11 +118,13 @@ function pressDot() {
 function pressClear() {
   if (clear.innerHTML == "C") {
     clear.innerHTML = "AC";
+    inputting = true;
   } else {
-    storedValue = "0";
+    memoryValue = "";
+    operationValue = "";
     uncolorActiveOperator();
     activeOperator = null;
-    displayingResult = true;
+    inputting = false;
   }
   screenValue = "0";
   readout.innerHTML = screenValue;
@@ -119,25 +135,30 @@ function pressOperator(operator) {
   uncolorActiveOperator();
   op.style.backgroundColor = "white";
   op.style.color = "orange";
-  let temp = screenValue;
-  if (!displayingResult) {
-    pressEquals();
-    displayingResult = true;
+  if (!operationState) {
+    memoryValue = screenValue;
   }
-  storedValue = temp;
+  if (inputting) {
+    pressEquals();
+    inputting = false;
+  }
   activeOperator = operator;
+  operationState = true;
 }
 
 function pressEquals() {
-  if (activeOperator != null) {
-    let temp = screenValue;
+  if (activeOperator) {
+    if (inputting || memoryValue != "") {
+      if (operationState) {
+        operationValue = screenValue;
+      }
+    }
     screenValue = calculate();
     readout.innerHTML = screenValue;
+    memoryValue = "";
+    inputting = false;
+    operationState = false;
     uncolorActiveOperator();
-    if (!displayingResult) {
-      storedValue = temp;
-    }
-    displayingResult = true;
   }
 }
 
