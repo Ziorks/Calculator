@@ -16,6 +16,8 @@ let storedValue = "0";
 let displayingResult = true;
 let activeOperator = null;
 
+let regex = /\d/g;
+
 let readout = document.querySelector("#readout");
 let dot = document.getElementById(".");
 let equals = document.getElementById("equals");
@@ -70,7 +72,7 @@ function update() {
 function pressDigit(digit) {
   if (displayingResult || screenValue == "0") {
     screenValue = `${digit}`;
-  } else {
+  } else if (screenValue.match(regex).length < 9) {
     screenValue += `${digit}`;
   }
   update();
@@ -80,7 +82,7 @@ function pressDigit(digit) {
 function press0() {
   if (displayingResult) {
     screenValue = "0";
-  } else if (screenValue != "0") {
+  } else if (screenValue != "0" && screenValue.match(regex).length < 9) {
     screenValue += "0";
   }
   update();
@@ -89,7 +91,10 @@ function press0() {
 function pressDot() {
   if (displayingResult || screenValue == "0") {
     screenValue = "0.";
-  } else if (!screenValue.includes(".")) {
+  } else if (
+    !screenValue.includes(".") &&
+    screenValue.match(regex).length < 9
+  ) {
     screenValue += ".";
   }
   update();
@@ -136,117 +141,198 @@ function pressEquals() {
   }
 }
 
+function digitMouseOver(e) {
+  e.style.transition = "all 0s";
+  e.style.backgroundColor = "rgb(99, 98, 98)";
+}
+
+function digitMouseLeave(e) {
+  e.style.transition = "all 800ms ease-out";
+  e.style.backgroundColor = "rgb(41, 41, 41)";
+}
+
+function specialMouseOver(e) {
+  e.style.transition = "all 0s";
+  e.style.backgroundColor = "rgb(204, 202, 202)";
+}
+
+function specialMouseLeave(e) {
+  e.style.transition = "all 800ms ease-out";
+  e.style.backgroundColor = "rgb(148, 147, 147)";
+}
+
+function operatorMouseOver(e) {
+  e.style.transition = "all 0s";
+  e.style.backgroundColor = "rgb(255, 212, 133)";
+}
+
+function operatorMouseLeave(e) {
+  e.style.transition = "all 800ms ease-out";
+  if (e.style.color == "orange") {
+    e.style.backgroundColor = "white";
+  } else {
+    e.style.backgroundColor = "orange";
+  }
+}
+
+//zero key events
 digits[0].addEventListener("click", (e) => {
   press0();
+});
+
+digits[0].addEventListener("mouseover", (e) => {
+  digitMouseOver(digits[0]);
+});
+
+digits[0].addEventListener("mouseleave", (e) => {
+  digitMouseLeave(digits[0]);
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.code == "Numpad0" || e.code == "Digit0") {
     press0();
-    digits[0].style.transition = "all 0s";
-    digits[0].style.backgroundColor = "rgb(99, 98, 98)";
+    digitMouseOver(digits[0]);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.code == "Numpad0" || e.code == "Digit0") {
-    digits[0].style.transition = "all 800ms ease-out";
-    digits[0].style.backgroundColor = "rgb(41, 41, 41)";
+    digitMouseLeave(digits[0]);
   }
 });
 
+//1-9 key events
 for (let i = 1; i < 10; i++) {
   digits[i].addEventListener("click", (e) => {
     pressDigit(i);
   });
 
+  digits[i].addEventListener("mouseover", (e) => {
+    digitMouseOver(digits[i]);
+  });
+
+  digits[i].addEventListener("mouseleave", (e) => {
+    digitMouseLeave(digits[i]);
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.code == "Numpad" + `${i}` || e.code == "Digit" + `${i}`) {
       pressDigit(i);
-      digits[i].style.transition = "all 0s";
-      digits[i].style.backgroundColor = "rgb(99, 98, 98)";
+      digitMouseOver(digits[i]);
     }
   });
 
   document.addEventListener("keyup", (e) => {
     if (e.code == "Numpad" + `${i}` || e.code == "Digit" + `${i}`) {
-      digits[i].style.transition = "all 800ms ease-out";
-      digits[i].style.backgroundColor = "rgb(41, 41, 41)";
+      digitMouseLeave(digits[i]);
     }
   });
 }
 
+//. key events
 dot.addEventListener("click", (e) => {
   pressDot();
+});
+
+dot.addEventListener("mouseover", (e) => {
+  digitMouseOver(dot);
+});
+
+dot.addEventListener("mouseleave", (e) => {
+  digitMouseLeave(dot);
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.code == "NumpadDecimal" || e.code == "Period") {
     pressDot();
-    dot.style.transition = "all 0s";
-    dot.style.backgroundColor = "rgb(99, 98, 98)";
+    digitMouseOver(dot);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.code == "NumpadDecimal" || e.code == "Period") {
-    dot.style.transition = "all 800ms ease-out";
-    dot.style.backgroundColor = "rgb(41, 41, 41)";
+    digitMouseLeave(dot);
   }
 });
 
+//clear key events
 clear.addEventListener("click", (e) => {
   pressClear();
+});
+
+clear.addEventListener("mouseover", (e) => {
+  specialMouseOver(clear);
+});
+
+clear.addEventListener("mouseleave", (e) => {
+  specialMouseLeave(clear);
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.code == "Delete") {
     pressClear();
-    clear.style.transition = "all 0s";
-    clear.style.backgroundColor = "rgb(204, 202, 202)";
+    specialMouseOver(clear);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.code == "Delete") {
-    clear.style.transition = "all 800ms ease-out";
-    clear.style.backgroundColor = "rgb(148, 147, 147)";
+    specialMouseLeave(clear);
   }
 });
 
+//switch sign key events
 sign.addEventListener("click", (e) => {
   screenValue = (-parseFloat(screenValue)).toString();
   readout.innerHTML = screenValue;
 });
 
+sign.addEventListener("mouseover", (e) => {
+  specialMouseOver(sign);
+});
+
+sign.addEventListener("mouseleave", (e) => {
+  specialMouseLeave(sign);
+});
+
+//percent key events
 percent.addEventListener("click", (e) => {
   screenValue = (parseFloat(screenValue) / 100).toString();
   readout.innerHTML = screenValue;
 });
 
+percent.addEventListener("mouseover", (e) => {
+  specialMouseOver(percent);
+});
+
+percent.addEventListener("mouseleave", (e) => {
+  specialMouseLeave(percent);
+});
+
+//operator key events
 for (const operator in operators) {
   const op = operators[operator];
+
   op.addEventListener("click", (e) => {
     op.style.transition = "all 0s";
     pressOperator(operator);
   });
+
   op.addEventListener("mouseover", (e) => {
-    op.style.backgroundColor = "rgb(255, 212, 133)";
+    operatorMouseOver(op);
   });
+
   op.addEventListener("mouseleave", (e) => {
-    op.style.transition = "all 800ms ease-out";
-    if (op.style.color == "orange") {
-      op.style.backgroundColor = "white";
-    } else {
-      op.style.backgroundColor = "orange";
-    }
+    operatorMouseLeave(op);
   });
+
   document.addEventListener("keydown", (e) => {
     if (e.code.toLocaleLowerCase() == "numpad" + `${operator}`) {
       op.style.transition = "all 0s";
       pressOperator(operator);
     }
   });
+
   document.addEventListener("keyup", (e) => {
     if (e.code.toLocaleLowerCase() == "numpad" + `${operator}`) {
       op.style.transition = "all 800ms ease-out";
@@ -254,21 +340,28 @@ for (const operator in operators) {
   });
 }
 
+//equals key events
 equals.addEventListener("click", (e) => {
   pressEquals();
+});
+
+equals.addEventListener("mouseover", (e) => {
+  operatorMouseOver(equals);
+});
+
+equals.addEventListener("mouseleave", (e) => {
+  operatorMouseLeave(equals);
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.code == "NumpadEnter" || e.code == "Enter") {
     pressEquals();
-    equals.style.transition = "all 0s";
-    equals.style.backgroundColor = "rgb(255, 212, 133)";
+    operatorMouseOver(equals);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.code == "NumpadEnter" || e.code == "Enter") {
-    equals.style.transition = "all 800ms ease-out";
-    equals.style.backgroundColor = "orange";
+    operatorMouseLeave(equals);
   }
 });
