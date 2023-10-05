@@ -37,12 +37,20 @@ function calculate() {
   switch (activeOperator) {
     case "add":
       return (parseFloat(screenValue) + parseFloat(storedValue)).toString();
-    case "subtract":
-      return (parseFloat(screenValue) - parseFloat(storedValue)).toString();
     case "multiply":
       return (parseFloat(screenValue) * parseFloat(storedValue)).toString();
+    case "subtract":
+      if (displayingResult) {
+        return (parseFloat(screenValue) - parseFloat(storedValue)).toString();
+      } else {
+        return (parseFloat(storedValue) - parseFloat(screenValue)).toString();
+      }
     case "divide":
-      return (parseFloat(screenValue) / parseFloat(storedValue)).toString();
+      if (displayingResult) {
+        return (parseFloat(screenValue) / parseFloat(storedValue)).toString();
+      } else {
+        return (parseFloat(storedValue) / parseFloat(screenValue)).toString();
+      }
   }
 }
 
@@ -91,7 +99,6 @@ function pressDot() {
 function pressClear() {
   if (clear.innerHTML == "C") {
     clear.innerHTML = "AC";
-    displayingResult = false;
   } else {
     storedValue = "0";
     uncolorActiveOperator();
@@ -110,17 +117,21 @@ function pressOperator(operator) {
   let temp = screenValue;
   if (!displayingResult) {
     pressEquals();
-    storedValue = temp;
     displayingResult = true;
   }
+  storedValue = temp;
   activeOperator = operator;
 }
 
 function pressEquals() {
   if (activeOperator != null) {
+    let temp = screenValue;
     screenValue = calculate();
     readout.innerHTML = screenValue;
     uncolorActiveOperator();
+    if (!displayingResult) {
+      storedValue = temp;
+    }
     displayingResult = true;
   }
 }
