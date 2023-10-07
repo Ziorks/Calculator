@@ -60,13 +60,7 @@ body {
 .readout {
     color: white;
     font-size: max(4vh, 26px);
-    overflow: hidden;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.readout h1 {
-    text-align: right;
+    overflow: scroll;
 }
 
 button {

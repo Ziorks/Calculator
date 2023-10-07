@@ -21,6 +21,7 @@ let activeOperator = null;
 let regex = /\d/g;
 
 let readout = document.querySelector("#readout");
+let readoutFontSize = parseFloat(window.getComputedStyle(readout,null).getPropertyValue("font-size"));
 let dot = document.getElementById(".");
 let equals = document.getElementById("equals");
 let sign = document.getElementById("sign");
@@ -80,6 +81,10 @@ function update() {
   readout.innerHTML = screenValue;
   inputting = true;
   uncolorActiveOperator();
+  while (readout.scrollWidth > readout.clientWidth) {
+    readoutFontSize--;
+    readout.style.fontSize = readoutFontSize + "px";
+  }
 }
 
 function pressDigit(digit) {
@@ -385,4 +390,9 @@ document.addEventListener("keyup", (e) => {
   if (e.code == "NumpadEnter" || e.code == "Enter") {
     operatorMouseLeave(equals);
   }
+});
+
+window.addEventListener("resize", e => {
+  let vh = (window.innerHeight * .06).toFixed(1);
+  readout.style.fontSize = Math.max(vh, readoutFontSize) + "px";
 });
