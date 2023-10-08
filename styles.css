@@ -55,13 +55,14 @@ body {
     margin-top: 40%;
     margin-bottom: 3%;
     padding: 0 8%;
+    overflow: scroll;
 }
 
 .readout {
     color: white;
-    font-size: max(5vh, 33px);
-    overflow: scroll;
+    font-size: max(5vh, 93px);
     text-align: right;
+    overflow: scroll;
 }
 
 

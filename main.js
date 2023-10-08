@@ -20,6 +20,7 @@ let inputting = true;
 let awaitingNum2 = false;
 let activeOperator = null;
 
+let display = document.querySelector(".display");
 let readout = document.querySelector("#readout");
 let dot = document.getElementById(".");
 let equals = document.getElementById("equals");
@@ -36,6 +37,30 @@ let operators = {
   multiply: document.getElementById("multiply"),
   divide: document.getElementById("divide"),
 };
+
+function resizeReadout() {
+  let readoutFontSize = parseFloat(
+    window.getComputedStyle(readout, null).getPropertyValue("font-size")
+  );
+  while (display.scrollHeight > display.clientHeight) {
+    readoutFontSize--;
+    readout.style.fontSize = readoutFontSize + "px";
+  }
+  while (display.scrollHeight <= display.clientHeight) {
+    readoutFontSize++;
+    readout.style.fontSize = readoutFontSize + "px";
+    if (display.scrollHeight > display.clientHeight) {
+      readoutFontSize--;
+      readout.style.fontSize = readoutFontSize + "px";
+      break;
+    }
+  }
+  while (readout.scrollWidth > readout.clientWidth) {
+    readoutFontSize--;
+    readout.style.fontSize = readoutFontSize + "px";
+  }
+}
+resizeReadout();
 
 function calculate() {
   if (activeOperator) {
@@ -62,6 +87,7 @@ function calculate() {
     }
     screenValue = num1;
     readout.innerHTML = screenValue;
+    resizeReadout();
     inputting = false;
     uncolorActiveOperator();
   }
@@ -76,6 +102,7 @@ function uncolorActiveOperator() {
 
 function updateInput() {
   readout.innerHTML = screenValue;
+  resizeReadout();
   inputting = true;
   uncolorActiveOperator();
 }
@@ -124,6 +151,7 @@ function pressClear() {
     awaitingNum2 = false;
   }
   screenValue = "0";
+  resizeReadout();
   inputting = true;
   readout.innerHTML = screenValue;
 }
@@ -373,4 +401,8 @@ document.addEventListener("keyup", (e) => {
   if (e.code == "NumpadEnter" || e.code == "Enter") {
     operatorMouseLeave(equals);
   }
+});
+
+window.addEventListener("resize", (e) => {
+  resizeReadout();
 });
