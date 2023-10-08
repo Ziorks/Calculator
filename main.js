@@ -12,13 +12,11 @@ for (let i = 0; i < buttons.length; i++) {
 }
 
 let screenValue = "0";
-let memoryValue = "";
-let operationValue = "";
-let inputting = false;
-let operationState = false;
+let num1 = "";
+let num2 = "";
+let inputting = true;
+let awaitingNum2 = false;
 let activeOperator = null;
-
-let regex = /\d/g;
 
 let readout = document.querySelector("#readout");
 let dot = document.getElementById(".");
@@ -38,34 +36,32 @@ let operators = {
 };
 
 function calculate() {
-  const scrnum = parseFloat(screenValue);
-  const memnum = parseFloat(memoryValue);
-  const opnum = parseFloat(operationValue);
-  switch (activeOperator) {
-    case "add":
-      if (memoryValue == "") {
-        return (scrnum + opnum).toString();
-      } else {
-        return (memnum + opnum).toString();
-      }
-    case "multiply":
-      if (memoryValue == "") {
-        return (scrnum * opnum).toString();
-      } else {
-        return (memnum * opnum).toString();
-      }
-    case "subtract":
-      if (memoryValue == "") {
-        return (scrnum - opnum).toString();
-      } else {
-        return (memnum - opnum).toString();
-      }
-    case "divide":
-      if (memoryValue == "") {
-        return (scrnum / opnum).toString();
-      } else {
-        return (memnum / opnum).toString();
-      }
+  if (activeOperator) {
+    if (!awaitingNum2) {
+      num1 = screenValue;
+    } else {
+      num2 = screenValue;
+    }
+    const n1 = parseFloat(num1);
+    const n2 = parseFloat(num2);
+    switch (activeOperator) {
+      case "add":
+        num1 = (n1 + n2).toString();
+        break;
+      case "multiply":
+        num1 = (n1 * n2).toString();
+        break;
+      case "subtract":
+        num1 = (n1 - n2).toString();
+        break;
+      case "divide":
+        num1 = (n1 / n2).toString();
+        break;
+    }
+    screenValue = num1;
+    readout.innerHTML = screenValue;
+    inputting = false;
+    uncolorActiveOperator();
   }
 }
 
@@ -76,7 +72,7 @@ function uncolorActiveOperator() {
   }
 }
 
-function update() {
+function updateInput() {
   readout.innerHTML = screenValue;
   inputting = true;
   uncolorActiveOperator();
@@ -85,10 +81,10 @@ function update() {
 function pressDigit(digit) {
   if (!inputting || screenValue == "0") {
     screenValue = `${digit}`;
-  } else if (screenValue.match(regex).length < 9) {
+  } else if (screenValue.match(/\d/g).length < 9) {
     screenValue += `${digit}`;
   }
-  update();
+  updateInput();
   clear.innerHTML = "C";
 }
 
@@ -96,10 +92,10 @@ function press0() {
   if (!inputting) {
     screenValue = "0";
     clear.innerHTML = "C";
-  } else if (screenValue != "0" && screenValue.match(regex).length < 9) {
+  } else if (screenValue != "0" && screenValue.match(/\d/g).length < 9) {
     screenValue += "0";
   }
-  update();
+  updateInput();
 }
 
 function pressDot() {
@@ -111,22 +107,22 @@ function pressDot() {
   ) {
     screenValue += ".";
   }
-  update();
+  updateInput();
   clear.innerHTML = "C";
 }
 
 function pressClear() {
   if (clear.innerHTML == "C") {
     clear.innerHTML = "AC";
-    inputting = true;
   } else {
-    memoryValue = "";
-    operationValue = "";
+    num1 = "";
+    num2 = "";
     uncolorActiveOperator();
     activeOperator = null;
-    inputting = false;
+    awaitingNum2 = false;
   }
   screenValue = "0";
+  inputting = true;
   readout.innerHTML = screenValue;
 }
 
@@ -135,31 +131,21 @@ function pressOperator(operator) {
   uncolorActiveOperator();
   op.style.backgroundColor = "white";
   op.style.color = "orange";
-  if (!operationState) {
-    memoryValue = screenValue;
+  if (!awaitingNum2) {
+    num1 = screenValue;
+  } else {
+    if (inputting) {
+      calculate();
+    }
   }
-  if (inputting) {
-    pressEquals();
-    inputting = false;
-  }
+  inputting = false;
   activeOperator = operator;
-  operationState = true;
+  awaitingNum2 = true;
 }
 
 function pressEquals() {
-  if (activeOperator) {
-    if (inputting || memoryValue != "") {
-      if (operationState) {
-        operationValue = screenValue;
-      }
-    }
-    screenValue = calculate();
-    readout.innerHTML = screenValue;
-    memoryValue = "";
-    inputting = false;
-    operationState = false;
-    uncolorActiveOperator();
-  }
+  calculate();
+  awaitingNum2 = false;
 }
 
 function digitMouseOver(e) {
