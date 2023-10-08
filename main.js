@@ -151,9 +151,9 @@ function pressClear() {
     awaitingNum2 = false;
   }
   screenValue = "0";
+  readout.innerHTML = screenValue;
   resizeReadout();
   inputting = true;
-  readout.innerHTML = screenValue;
 }
 
 function pressOperator(operator) {
